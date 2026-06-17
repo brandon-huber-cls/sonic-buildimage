@@ -161,7 +161,7 @@ class Fan(FanBase):
         
         if not self.is_psu_fan and self.get_presence():            
             speed_path = "{}{}".format(CPLD_FAN_I2C_PATH, 'duty_cycle_percentage')
-            return self._api_helper.write_txt_file(speed_path, int(speed))
+            return self._api_helper.write_txt_file(speed_path, str(int(speed)))
 
         return False
 
@@ -281,4 +281,3 @@ class Fan(FanBase):
             bool: True if it is replaceable.
         """
         return True if not self.is_psu_fan else False
-
