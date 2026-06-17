@@ -6,6 +6,28 @@ import sys
 import time
 
 
+class SensitiveDataFilter:
+    """Filter to redact sensitive data from pexpect logs"""
+    def __init__(self, logfile, sensitive_patterns=None):
+        self.logfile = logfile
+        self.sensitive_patterns = sensitive_patterns or []
+        self.buffer = ""
+    
+    def write(self, data):
+        """Write data to logfile after redacting sensitive information"""
+        output = data
+        for pattern in self.sensitive_patterns:
+            if pattern in output:
+                # Redact the sensitive data
+                output = output.replace(pattern, "***REDACTED***")
+        self.logfile.write(output)
+    
+    def flush(self):
+        """Flush the underlying logfile"""
+        if hasattr(self.logfile, 'flush'):
+            self.logfile.flush()
+
+
 def main():
 
     parser = argparse.ArgumentParser(description='test_login cmdline parser')
@@ -23,10 +45,16 @@ def main():
     firsttime_prompt = 'firsttime_exit'
     passwd_change_prompt = ['Current password:', 'New password:', 'Retype new password:']
 
+    # Create a filter to redact sensitive data from logs
+    sensitive_filter = SensitiveDataFilter(
+        sys.stdout,
+        sensitive_patterns=[args.P, args.N]
+    )
+
     i = 0
     while True:
         try:
-            p = pexpect.spawn("telnet 127.0.0.1 {}".format(args.p), timeout=600, logfile=sys.stdout, encoding='utf-8')
+            p = pexpect.spawn("telnet 127.0.0.1 {}".format(args.p), timeout=600, logfile=sensitive_filter, encoding='utf-8')
             break
         except Exception as e:
             print(str(e))
