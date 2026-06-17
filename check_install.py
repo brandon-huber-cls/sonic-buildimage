@@ -26,7 +26,7 @@ def main():
     i = 0
     while True:
         try:
-            p = pexpect.spawn("telnet 127.0.0.1 {}".format(args.p), timeout=600, logfile=sys.stdout, encoding='utf-8')
+            p = pexpect.spawn("ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p {} {}@127.0.0.1".format(args.p, args.u), timeout=600, logfile=sys.stdout, encoding='utf-8')
             break
         except Exception as e:
             print(str(e))
@@ -36,15 +36,19 @@ def main():
             time.sleep(1)
 
     # select default SONiC Image
-    p.expect(grub_selection)
-    p.sendline()
+    try:
+        p.expect(grub_selection, timeout=5)
+        p.sendline()
+    except pexpect.TIMEOUT:
+        pass
+    
     # bootup sonic image
     while True:
-        i = p.expect([login_prompt, passwd_prompt, firsttime_prompt, cmd_prompt])
+        i = p.expect([login_prompt, passwd_prompt, firsttime_prompt, cmd_prompt, 'password:'])
         if i == 0:
             # send user name
             p.sendline(args.u)
-        elif i == 1:
+        elif i == 1 or i == 4:
             # send password
             p.sendline(args.P)
             # Check for password change prompt
