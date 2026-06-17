@@ -83,8 +83,7 @@ class HwSKUInitBase():
 
         template = env.get_template(template_file)
 
-        # nosemgrep: python.lang.security.audit.eval-detected.eval-detected
-        output = eval(f'template.render({data_name}=data)')
+        output = template.render(**{data_name: data})
         if output_file:
             with open(self.get_sku_file_path(output_file), 'w') as f:
                 f.write(output)
