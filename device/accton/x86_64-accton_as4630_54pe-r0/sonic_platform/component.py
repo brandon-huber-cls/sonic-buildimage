@@ -6,6 +6,7 @@
 #
 #############################################################################
 
+import logging
 
 try:
     from sonic_platform_base.component_base import ComponentBase
@@ -23,6 +24,8 @@ COMPONENT_LIST= [
    ("BIOS", "Basic Input/Output System")
    
 ]
+
+logger = logging.getLogger(__name__)
 
 class Component(ComponentBase):
     """Platform-specific Component class"""
@@ -42,6 +45,7 @@ class Component(ComponentBase):
                 bios_version = fd.read()
                 return bios_version.strip()
         except Exception as e:
+            logger.error("Failed to read BIOS version")
             return None
 
     def __get_cpld_version(self):
@@ -53,7 +57,7 @@ class Component(ComponentBase):
                 cpld_version_raw= self._api_helper.read_txt_file(cpld_path)
                 cpld_version[cpld_name] = "{}".format(int(cpld_version_raw,16))
             except Exception as e:
-                print('Get exception when read cpld')
+                logger.error("Failed to read CPLD version for %s", cpld_name)
                 cpld_version[cpld_name] = 'None'
         
         return cpld_version

@@ -7,6 +7,7 @@ try:
     import sys
     import time
     import string
+    import logging
     from ctypes import create_string_buffer
     from sonic_sfp.sfputilbase import SfpUtilBase
 except ImportError as e:
@@ -14,6 +15,9 @@ except ImportError as e:
 
 SFP_STATUS_INSERTED = '1'
 SFP_STATUS_REMOVED = '0'
+
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 
 class SfpUtil(SfpUtilBase):
@@ -77,7 +81,7 @@ class SfpUtil(SfpUtilBase):
             content = val_file.readline().rstrip()
             val_file.close()
         except IOError as e:
-            print("Error: unable to access file: %s" % str(e))
+            logger.error("Error: unable to access presence file for port %d: %s", port_num, type(e).__name__)
             return False
 
         if content == "1":
@@ -109,7 +113,7 @@ class SfpUtil(SfpUtilBase):
                 return False
 
         except IOError as e:
-            print("Error: unable to open file: %s" % str(e))
+            logger.error("Error: unable to open eeprom file for port %d: %s", port_num, type(e).__name__)
             return False
         finally:
             if eeprom is not None:
@@ -139,7 +143,7 @@ class SfpUtil(SfpUtilBase):
             eeprom.write(buffer[0])
             return True
         except IOError as e:
-            print("Error: unable to open file: %s" % str(e))
+            logger.error("Error: unable to open eeprom file for port %d: %s", port_num, type(e).__name__)
             return False
         finally:
             if eeprom is not None:
@@ -155,7 +159,7 @@ class SfpUtil(SfpUtilBase):
         try:
             reg_file = open(self.__port_to_mod_rst, 'r+', buffering=0)
         except IOError as e:
-            print( "Error: unable to open file: %s" % str(e))
+            logger.error("Error: unable to open reset file for port %d: %s", port_num, type(e).__name__)
             return False
 
         #toggle reset
