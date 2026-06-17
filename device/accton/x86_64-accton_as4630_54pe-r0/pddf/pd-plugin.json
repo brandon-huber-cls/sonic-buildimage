@@ -58,9 +58,15 @@
             }
         },
         
-        "duty_cycle_to_pwm": "lambda dc: ((dc*100.0)/625)",
+        "duty_cycle_to_pwm": {
+            "multiplier": 100.0,
+            "divisor": 625
+        },
 
-        "pwm_to_duty_cycle": "lambda pwm: ((pwm*625.0)/100)"
+        "pwm_to_duty_cycle": {
+            "multiplier": 625.0,
+            "divisor": 100
+        }
     }
 
 }
